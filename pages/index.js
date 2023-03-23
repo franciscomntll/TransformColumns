@@ -46,11 +46,28 @@ function CsvToJsonConverter() {
         }
     };
 
+    const sampleFile = [
+        {
+            "Original": "",
+            "New": ""
+        }
+    ]
+
+    const handleSampleFile = () => {
+        const csv = json2csv.parse(sampleFile);
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const filename = "equivalencyTable.csv"
+        saveAs(blob, filename);
+    }
+
     return (
         <div className='max-w-screen-md mx-auto py-20 w-full text-center flex flex-col gap-10'>
             <h1 className='text-5xl font-black text-indigo-500 w-full'>Transform CSV Columns</h1>
             <div className='flex flex-col items-center w-full border-2 border-indigo-500 rounded-xl p-6'>
-                <legend className='text-lg font-bold text-gray-800'>Transform columns:</legend>
+                <span className='flex items-center gap-3 mb-2'>
+                    <legend className='text-lg font-bold text-gray-800'>Upload equivalency table</legend>
+                    <button  onClick={handleSampleFile} className='text-xs bg-green-500 p-2 rounded text-white hover:bg-green-600 transition'>Download sample file here</button>
+                </span>
                 <div class="flex justify-center w-full">
                     <div class="mb-3 w-96 ">
                         <input
@@ -59,14 +76,16 @@ function CsvToJsonConverter() {
                         <small className='text-right w-full'>Upload equivalency table file only .csv</small>
                     </div>
                 </div>
-                <ul className='w-full grid grid-cols-2 pt-10 mx-auto flex-wrap gap-2 flex flex-col text-left list-inside	list-disc	'>
-                    {index && index.map((item => (
-                        <li className='text-sm'><span className='text-gray-600'>"{item[0]}"</span> {`==>`} <span className='text-gray-900 font-semibold'>"{item[1]}"</span></li>
-                    )))}
-                </ul>
+                {index && (
+                    <ul className='w-full grid grid-cols-2 pt-10 mx-auto flex-wrap gap-2 flex flex-col text-left list-inside	list-disc	'>
+                        {index && index.map((item => (
+                            <li className='text-sm'><span className='text-gray-600'>"{item[0]}"</span> {`==>`} <span className='text-gray-900 font-semibold'>"{item[1]}"</span></li>
+                        )))}
+                    </ul>
+                )}
             </div>
             <div className='flex flex-col items-center w-full border-2 border-indigo-500 rounded-xl p-6'>
-                <legend className='text-lg font-bold text-gray-800'>Upload CSV Data</legend>
+                <legend className='text-lg font-bold text-gray-800 mb-2'>Upload CSV Data</legend>
                 <div class="flex justify-center w-full">
                     <div class="mb-3 w-96 ">
                         <input
