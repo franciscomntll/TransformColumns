@@ -18,22 +18,26 @@ function CsvToJsonConverter() {
         const csvData = await csvFile.text();
         let jsonData = await csvtojson().fromString(csvData);
         if (index) {
-            jsonData = jsonData.map(dataItem => {
+            const jsonData2 = jsonData.map(dataItem => {
                 const newItem = { ...dataItem }
                 index.forEach(element => {
                     if (newItem[element[0]]) {
                         newItem[element[1]] = newItem[element[0]]
-                        delete newItem[element[0]]
+                        delete newItem[element]
                     }
                 });
                 return newItem
             })
+            const csv = json2csv.parse(jsonData2);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const filename = "data.csv"
+            saveAs(blob, filename);
+        } else {
+            const csv = json2csv.parse(jsonData);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const filename = "data.csv"
+            saveAs(blob, filename);
         }
-        console.log("hola")
-        const csv = json2csv.parse(jsonData);
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const filename = "data.csv"
-        saveAs(blob, filename);
     };
 
     const handleCsvIndex = async (event) => {
