@@ -3,11 +3,20 @@ import csvtojson from 'csvtojson';
 import json2csv from 'json2csv';
 import { saveAs } from 'file-saver';
 
+const convertStringToNumber = value => {
+    if (value === "") return value
+    const number = value.replace(/[^\d.]/g, "")
+    if (isNaN(number)) return value
+    return number
+}
+
 function CsvToJsonConverter() {
     const [csvFile, setCsvFile] = useState(null);
     const [index, setIndex] = useState(null);
+    const [count, setCount] = useState(0);
 
     const handleCsvFileChange = (event) => {
+        setCount(0)
         const file = event.target.files[0];
         setCsvFile(file);
     };
@@ -22,12 +31,13 @@ function CsvToJsonConverter() {
                 const newItem = { ...dataItem }
                 index.forEach(element => {
                     if (newItem[element[0]]) {
-                        newItem[element[1]] = newItem[element[0]]
+                        newItem[element[1]] = element[2] === "number" ? convertStringToNumber(newItem[element[0]]) : newItem[element[0]]
                         delete newItem[element]
                     }
                 });
                 return newItem
             })
+            setCount(jsonData2.length)
             const csv = json2csv.parse(jsonData2);
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const filename = "data.csv"
@@ -41,19 +51,21 @@ function CsvToJsonConverter() {
     };
 
     const handleCsvIndex = async (event) => {
+        setCount(0)
         const file = event.target.files[0];
         if (file) {
             const csvData = await file.text();
-            const jsonData = await csvtojson().fromString(csvData);
-            const depure = jsonData.filter(item => item["New"] !== "").map(Object.values)
+            const jsonData = (await csvtojson().fromString(csvData)).filter(item => item["ORIGINAL"] !== "");
+            const depure = jsonData.filter(item => item["NEW"] !== "").map(Object.values)
             setIndex(depure)
         }
     };
 
     const sampleFile = [
         {
-            "Original": "",
-            "New": ""
+            "ORIGINAL": "",
+            "NEW": "",
+            "DATA_TYPE": ""
         }
     ]
 
@@ -75,6 +87,7 @@ function CsvToJsonConverter() {
                 <div class="flex justify-center w-full">
                     <div class="mb-3 w-96 ">
                         <input
+                            value={index && index.name}
                             class="relative m-0 block w-full min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-clip-padding py-[0.32rem] px-3 text-base font-normal text-neutral-700 transition duration-300 ease-in-out file:-mx-3 file:-my-[0.32rem] file:overflow-hidden file:rounded-none file:border-0 file:border-solid file:border-inherit file:bg-indigo-500 file:px-3 file:py-[0.32rem] file:text-white file:cursor-pointer file:transition file:duration-150 file:ease-in-out file:[margin-inline-end:0.75rem] file:[border-inline-end-width:1px] hover:file:bg-indigo-900 focus:border-primary focus:text-neutral-700 focus:shadow-[0_0_0_1px] focus:shadow-primary focus:outline-none "
                             type="file" accept=".csv" onChange={handleCsvIndex} />
                         <small className='text-right w-full'>Upload equivalency table file only .csv</small>
@@ -93,13 +106,14 @@ function CsvToJsonConverter() {
                 <div class="flex justify-center w-full">
                     <div class="mb-3 w-96 ">
                         <input
+                            valle={csvFile && csvFile.name}
                             class="relative m-0 block w-full min-w-0 flex-auto rounded border border-solid border-neutral-300 bg-clip-padding py-[0.32rem] px-3 text-base font-normal text-neutral-700 transition duration-300 ease-in-out file:-mx-3 file:-my-[0.32rem] file:overflow-hidden file:rounded-none file:border-0 file:border-solid file:border-inherit file:bg-indigo-500 file:px-3 file:py-[0.32rem] file:text-white file:cursor-pointer file:transition file:duration-150 file:ease-in-out file:[margin-inline-end:0.75rem] file:[border-inline-end-width:1px] hover:file:bg-indigo-900 focus:border-primary focus:text-neutral-700 focus:shadow-[0_0_0_1px] focus:shadow-primary focus:outline-none "
                             type="file" accept=".csv" onChange={handleCsvFileChange} />
                         <small className='text-right w-full'>Upload equivalency table file only .csv</small>
                     </div>
                 </div>
             </div>
-
+                            Items converted: {count}
             <button className='w-full py-3 bg-indigo-500 rounded-xl text-white font-bold text-2xl hover:bg-indigo-900 transition' onClick={handleConvertCsvToJson}>Convert</button>
         </div>
     );
